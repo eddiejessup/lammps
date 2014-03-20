@@ -568,9 +568,9 @@ void FixLangevin::post_force_untemplated
 	f[i][2] *= gjffac;
       }
 
-      f[i][0] += fdrag[0] + fran[0];
-      f[i][1] += fdrag[1] + fran[1];
-      f[i][2] += fdrag[2] + fran[2];
+      f[i][0] += fran[0];
+      f[i][1] += fran[1];
+      f[i][2] += fran[2];
 
       if (Tp_TALLY) {
 	flangevin[i][0] = fdrag[0] + fran[0];
@@ -684,15 +684,15 @@ void FixLangevin::omega_thermostat()
       inertiaone = SINERTIA*radius[i]*radius[i]*rmass[i];
       if (tstyle == ATOM) tsqrt = sqrt(tforce[i]);
       gamma1 = -tendivthree*inertiaone / t_period / ftm2v;
-      gamma2 = sqrt(inertiaone) * sqrt(80.0*boltz/t_period/dt/mvv2e) / ftm2v;
+      gamma2 = sqrt(inertiaone) * sqrt(7.2*boltz/t_period/dt/mvv2e) / ftm2v;
       gamma1 *= 1.0/ratio[type[i]];
       gamma2 *= 1.0/sqrt(ratio[type[i]]) * tsqrt;
       tran[0] = gamma2*(random->uniform()-0.5);
       tran[1] = gamma2*(random->uniform()-0.5);
       tran[2] = gamma2*(random->uniform()-0.5);
-      torque[i][0] += gamma1*omega[i][0] + tran[0];
-      torque[i][1] += gamma1*omega[i][1] + tran[1];
-      torque[i][2] += gamma1*omega[i][2] + tran[2];
+      torque[i][0] += tran[0];
+      torque[i][1] += tran[1];
+      torque[i][2] += tran[2];
     }
   }
 }
