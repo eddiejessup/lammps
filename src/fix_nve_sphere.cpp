@@ -86,6 +86,10 @@ void FixNVESphere::initial_integrate(int vflag)
   double dtfm,dtirotate,msq,scale;
   double g[3];
 
+  double gamma_m, gamma_I;
+  double ftm2v = force->ftm2v;
+  double t_period = 1.0;
+
   double **x = atom->x;
   double **v = atom->v;
   double **f = atom->f;
@@ -107,17 +111,21 @@ void FixNVESphere::initial_integrate(int vflag)
   for (int i = 0; i < nlocal; i++) {
     if (mask[i] & groupbit) {
       dtfm = dtf / rmass[i];
-      v[i][0] += dtfm * f[i][0];
-      v[i][1] += dtfm * f[i][1];
-      v[i][2] += dtfm * f[i][2];
+      gamma_m = rmass[i] / t_period / ftm2v;
+
+      v[i][0] = f[i][0] / gamma_m;
+      v[i][1] = f[i][1] / gamma_m;
+      v[i][2] = f[i][2] / gamma_m;
       x[i][0] += dtv * v[i][0];
       x[i][1] += dtv * v[i][1];
       x[i][2] += dtv * v[i][2];
 
       dtirotate = dtfrotate / (radius[i]*radius[i]*rmass[i]);
-      omega[i][0] += dtirotate * torque[i][0];
-      omega[i][1] += dtirotate * torque[i][1];
-      omega[i][2] += dtirotate * torque[i][2];
+      gamma_I = INERTIA*radius[i]*radius[i]*rmass[i] / t_period / ftm2v;
+
+      omega[i][0] = torque[i][0] / gamma_I;
+      omega[i][1] = torque[i][1] / gamma_I;
+      omega[i][2] = torque[i][2] / gamma_I;
     }
   }
 
@@ -162,19 +170,4 @@ void FixNVESphere::final_integrate()
 
   double dtfrotate = dtf / INERTIA;
 
-  // update v,omega for all particles
-  // d_omega/dt = torque / inertia
-
-  for (int i = 0; i < nlocal; i++)
-    if (mask[i] & groupbit) {
-      dtfm = dtf / rmass[i];
-      v[i][0] += dtfm * f[i][0];
-      v[i][1] += dtfm * f[i][1];
-      v[i][2] += dtfm * f[i][2];
-
-      dtirotate = dtfrotate / (radius[i]*radius[i]*rmass[i]);
-      omega[i][0] += dtirotate * torque[i][0];
-      omega[i][1] += dtirotate * torque[i][1];
-      omega[i][2] += dtirotate * torque[i][2];
-    }
 }
