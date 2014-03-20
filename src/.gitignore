@@ -12,3 +12,8 @@ log.*
 *.exe
 .*.swp
 *.orig
+
+# products of make
+Makefile.package*
+lmp_*
+style_*.h
