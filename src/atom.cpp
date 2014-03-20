@@ -72,6 +72,7 @@ Atom::Atom(LAMMPS *lmp) : Pointers(lmp)
   type = mask = NULL;
   image = NULL;
   x = v = f = NULL;
+  f_det = NULL;
 
   molecule = NULL;
   molindex = molatom = NULL;
@@ -200,6 +201,7 @@ Atom::~Atom()
   memory->destroy(x);
   memory->destroy(v);
   memory->destroy(f);
+  memory->destroy(f_det);
 
   memory->destroy(q);
   memory->destroy(mu);
@@ -1819,6 +1821,7 @@ void *Atom::extract(char *name)
   if (strcmp(name,"x") == 0) return (void *) x;
   if (strcmp(name,"v") == 0) return (void *) v;
   if (strcmp(name,"f") == 0) return (void *) f;
+  if (strcmp(name,"f_det") == 0) return (void *) f_det;
   if (strcmp(name,"molecule") == 0) return (void *) molecule;
   if (strcmp(name,"q") == 0) return (void *) q;
   if (strcmp(name,"mu") == 0) return (void *) mu;

@@ -458,6 +458,7 @@ void FixLangevin::post_force_untemplated
 
   double **v = atom->v;
   double **f = atom->f;
+  double **f_det = atom->f_det;
   double *rmass = atom->rmass;
   int *type = atom->type;
   int *mask = atom->mask;
@@ -554,6 +555,10 @@ void FixLangevin::post_force_untemplated
 	f[i][1] *= gjffac;
 	f[i][2] *= gjffac;
       }
+
+      f_det[i][0] = f[i][0];
+      f_det[i][1] = f[i][1];
+      f_det[i][2] = f[i][2];
 
       f[i][0] += fran[0];
       f[i][1] += fran[1];
