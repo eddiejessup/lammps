@@ -454,7 +454,7 @@ void FixLangevin::post_force_untemplated
    int Tp_BIAS, int Tp_RMASS, int Tp_ZERO)
 #endif
 {
-  double gamma1,gamma2;
+  double gamma2;
 
   double **v = atom->v;
   double **f = atom->f;
@@ -484,7 +484,7 @@ void FixLangevin::post_force_untemplated
   //   sum random force over all atoms in group
   //   subtract sum/count from each atom in group
 
-  double fdrag[3],fran[3],fsum[3],fsumall[3];
+  double fran[3],fsum[3],fsumall[3];
   bigint count;
   double fswap;
 
@@ -518,12 +518,9 @@ void FixLangevin::post_force_untemplated
     if (mask[i] & groupbit) {
       if (Tp_TSTYLEATOM) tsqrt = sqrt(tforce[i]);
       if (Tp_RMASS) {
-	gamma1 = -rmass[i] / t_period / ftm2v;
 	gamma2 = sqrt(rmass[i]) * sqrt(24.0*boltz/t_period/dt/mvv2e) / ftm2v;
-	gamma1 *= 1.0/ratio[type[i]];
 	gamma2 *= 1.0/sqrt(ratio[type[i]]) * tsqrt;
       } else {
-	gamma1 = gfactor1[type[i]];
 	gamma2 = gfactor2[type[i]] * tsqrt;
       }
 
@@ -533,17 +530,10 @@ void FixLangevin::post_force_untemplated
 
       if (Tp_BIAS) {
 	temperature->remove_bias(i,v[i]);
-	fdrag[0] = gamma1*v[i][0];
-	fdrag[1] = gamma1*v[i][1];
-	fdrag[2] = gamma1*v[i][2];
 	if (v[i][0] == 0.0) fran[0] = 0.0;
 	if (v[i][1] == 0.0) fran[1] = 0.0;
 	if (v[i][2] == 0.0) fran[2] = 0.0;
 	temperature->restore_bias(i,v[i]);
-      } else {
-	fdrag[0] = gamma1*v[i][0];
-	fdrag[1] = gamma1*v[i][1];
-	fdrag[2] = gamma1*v[i][2];
       }
 
       if (Tp_GJF) {
@@ -557,9 +547,6 @@ void FixLangevin::post_force_untemplated
 	franprev[i][2] = fran[2];
 	fran[2] = fswap;
 
-	fdrag[0] *= gjffac;
-	fdrag[1] *= gjffac;
-	fdrag[2] *= gjffac;
 	fran[0] *= gjffac;
 	fran[1] *= gjffac;
 	fran[2] *= gjffac;
@@ -573,9 +560,9 @@ void FixLangevin::post_force_untemplated
       f[i][2] += fran[2];
 
       if (Tp_TALLY) {
-	flangevin[i][0] = fdrag[0] + fran[0];
-	flangevin[i][1] = fdrag[1] + fran[1];
-	flangevin[i][2] = fdrag[2] + fran[2];
+	flangevin[i][0] = fran[0];
+	flangevin[i][1] = fran[1];
+	flangevin[i][2] = fran[2];
       }
 
       if (Tp_ZERO) {
@@ -656,7 +643,7 @@ void FixLangevin::compute_target()
 
 void FixLangevin::omega_thermostat()
 {
-  double gamma1,gamma2;
+  double gamma2;
 
   double boltz = force->boltz;
   double dt = update->dt;
@@ -671,10 +658,6 @@ void FixLangevin::omega_thermostat()
   int *type = atom->type;
   int nlocal = atom->nlocal;
 
-  // rescale gamma1/gamma2 by 10/3 & sqrt(10/3) for spherical particles
-  // does not affect rotational thermosatting
-  // gives correct rotational diffusivity behavior
-
   double tendivthree = 10.0/3.0;
   double tran[3];
   double inertiaone;
@@ -683,9 +666,7 @@ void FixLangevin::omega_thermostat()
     if (mask[i] & groupbit) {
       inertiaone = SINERTIA*radius[i]*radius[i]*rmass[i];
       if (tstyle == ATOM) tsqrt = sqrt(tforce[i]);
-      gamma1 = -tendivthree*inertiaone / t_period / ftm2v;
       gamma2 = sqrt(inertiaone) * sqrt(7.2*boltz/t_period/dt/mvv2e) / ftm2v;
-      gamma1 *= 1.0/ratio[type[i]];
       gamma2 *= 1.0/sqrt(ratio[type[i]]) * tsqrt;
       tran[0] = gamma2*(random->uniform()-0.5);
       tran[1] = gamma2*(random->uniform()-0.5);
