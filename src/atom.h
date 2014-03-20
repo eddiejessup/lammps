@@ -50,6 +50,7 @@ class Atom : protected Pointers {
   int *type,*mask;
   imageint *image;
   double **x,**v,**f;
+  double **f_det;
 
   tagint *molecule;
   int *molindex,*molatom;

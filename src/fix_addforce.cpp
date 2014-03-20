@@ -220,6 +220,7 @@ void FixAddForce::post_force(int vflag)
 {
   double **x = atom->x;
   double **f = atom->f;
+  double **f_det = atom->f_det;
   int *mask = atom->mask;
   imageint *image = atom->image;
   int nlocal = atom->nlocal;
@@ -257,6 +258,10 @@ void FixAddForce::post_force(int vflag)
         f[i][0] += xvalue;
         f[i][1] += yvalue;
         f[i][2] += zvalue;
+
+        f_det[i][0] += xvalue;
+        f_det[i][1] += yvalue;
+        f_det[i][2] += zvalue;
       }
 
   // variable force, wrap with clear/add
@@ -297,6 +302,12 @@ void FixAddForce::post_force(int vflag)
         else if (ystyle) f[i][1] += yvalue;
         if (zstyle == ATOM) f[i][2] += sforce[i][2];
         else if (zstyle) f[i][2] += zvalue;
+        if (xstyle == ATOM) f_det[i][0] += sforce[i][0];
+        else if (xstyle) f_det[i][0] += xvalue;
+        if (ystyle == ATOM) f_det[i][1] += sforce[i][1];
+        else if (ystyle) f_det[i][1] += yvalue;
+        if (zstyle == ATOM) f_det[i][2] += sforce[i][2];
+        else if (zstyle) f_det[i][2] += zvalue;
       }
   }
 }
