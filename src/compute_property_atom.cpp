@@ -111,13 +111,6 @@ ComputePropertyAtom::ComputePropertyAtom(LAMMPS *lmp, int narg, char **arg) :
     } else if (strcmp(arg[iarg],"fz") == 0) {
       pack_choice[i] = &ComputePropertyAtom::pack_fz;
 
-    } else if (strcmp(arg[iarg],"f_det_x") == 0) {
-      pack_choice[i] = &ComputePropertyAtom::pack_f_det_x;
-    } else if (strcmp(arg[iarg],"f_det_y") == 0) {
-      pack_choice[i] = &ComputePropertyAtom::pack_f_det_y;
-    } else if (strcmp(arg[iarg],"f_det_z") == 0) {
-      pack_choice[i] = &ComputePropertyAtom::pack_f_det_z;
-
     } else if (strcmp(arg[iarg],"q") == 0) {
       if (!atom->q_flag)
         error->all(FLERR,"Compute property/atom for "
@@ -917,51 +910,6 @@ void ComputePropertyAtom::pack_fz(int n)
 
   for (int i = 0; i < nlocal; i++) {
     if (mask[i] & groupbit) buf[n] = f[i][2];
-    else buf[n] = 0.0;
-    n += nvalues;
-  }
-}
-
-/* ---------------------------------------------------------------------- */
-
-void ComputePropertyAtom::pack_f_det_x(int n)
-{
-  double **f_det = atom->f_det;
-  int *mask = atom->mask;
-  int nlocal = atom->nlocal;
-
-  for (int i = 0; i < nlocal; i++) {
-    if (mask[i] & groupbit) buf[n] = f_det[i][0];
-    else buf[n] = 0.0;
-    n += nvalues;
-  }
-}
-
-/* ---------------------------------------------------------------------- */
-
-void ComputePropertyAtom::pack_f_det_y(int n)
-{
-  double **f_det = atom->f_det;
-  int *mask = atom->mask;
-  int nlocal = atom->nlocal;
-
-  for (int i = 0; i < nlocal; i++) {
-    if (mask[i] & groupbit) buf[n] = f_det[i][1];
-    else buf[n] = 0.0;
-    n += nvalues;
-  }
-}
-
-/* ---------------------------------------------------------------------- */
-
-void ComputePropertyAtom::pack_f_det_z(int n)
-{
-  double **f_det = atom->f_det;
-  int *mask = atom->mask;
-  int nlocal = atom->nlocal;
-
-  for (int i = 0; i < nlocal; i++) {
-    if (mask[i] & groupbit) buf[n] = f_det[i][2];
     else buf[n] = 0.0;
     n += nvalues;
   }
