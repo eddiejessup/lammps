@@ -17,3 +17,13 @@ log.*
 Makefile.package*
 lmp_*
 style_*.h
+
+# dipole package
+atom_vec_dipole.cpp
+atom_vec_dipole.h
+pair_lj_cut_dipole_cut.cpp
+pair_lj_cut_dipole_cut.h
+pair_lj_cut_dipole_long.cpp
+pair_lj_cut_dipole_long.h
+pair_lj_long_dipole_long.cpp
+pair_lj_long_dipole_long.h
