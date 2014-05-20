@@ -661,7 +661,20 @@ void FixLangevin::omega_thermostat()
   double tendivthree = 10.0/3.0;
   double tran[3];
   double inertiaone;
-  
+
+  // Atom force. Maybe matters that this might be after translational diffusion, non-deterministic?
+  double **force = atom->f;
+  // Dipole orientation. First 3 elements are orientation (not sure if scaled to unity); last is magnitude.
+  double **mu = atom->mu;
+  // Self-propulsive force in low density, can ignore (beta * D) speed conversion prefactor and keep as force as only care about ratio.
+  double F_p_0 = 24.0;
+  // Critical fraction of self-propulsive force where rotational diffusion increases.
+  double k = 0.5;
+  // Particle orientation, taken from dipole orientation and scaled to unity (maybe scaling not needed).
+  double p[3];
+  // Effective displacive force particle feels, as sum of self0propulsive and interaction terms. something like that anyway.
+  double F;
+
   for (int i = 0; i < nlocal; i++) {
     if (mask[i] & groupbit) {
       inertiaone = SINERTIA*radius[i]*radius[i]*rmass[i];
@@ -671,6 +684,22 @@ void FixLangevin::omega_thermostat()
       tran[0] = gamma2*(random->uniform()-0.5);
       tran[1] = gamma2*(random->uniform()-0.5);
       tran[2] = gamma2*(random->uniform()-0.5);
+
+      // drag coefficient for athermal rotation
+      double gamma_ath = gamma2;
+
+      p[0] = mu[i][0] / mu[i][3];
+      p[1] = mu[i][1] / mu[i][3];
+      p[2] = mu[i][2] / mu[i][3];
+      F = (force[i][0] + F_p_0 * p[0]) * p[0] +
+          (force[i][1] + F_p_0 * p[1]) * p[1] +
+          (force[i][2] + F_p_0 * p[2]) * p[2];
+      if ((F / F_p_0) < k) {
+        tran[0] += gamma_ath*(random->uniform()-0.5);
+        tran[1] += gamma_ath*(random->uniform()-0.5);
+        tran[2] += gamma_ath*(random->uniform()-0.5);
+      }
+
       torque[i][0] += tran[0];
       torque[i][1] += tran[1];
       torque[i][2] += tran[2];
