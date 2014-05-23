@@ -686,9 +686,6 @@ void FixLangevin::omega_thermostat()
       tran[1] = gamma2*(random->uniform()-0.5);
       tran[2] = gamma2*(random->uniform()-0.5);
 
-      // drag coefficient for athermal rotation
-      double gamma_ath = gamma2
-
       p[0] = mu[i][0] / mu[i][3];
       p[1] = mu[i][1] / mu[i][3];
       p[2] = mu[i][2] / mu[i][3];
@@ -696,6 +693,12 @@ void FixLangevin::omega_thermostat()
           (force[i][1] + F_p_0 * p[1]) * p[1] +
           (force[i][2] + F_p_0 * p[2]) * p[2];
       if ((F / F_p_0) < k) {
+        // Energy of athermal rotation
+        double E_ath = 10.0 * boltz * tsqrt;
+        // drag coefficient for athermal rotation
+        double gamma_ath = sqrt(7.2 * inertiaone * E_ath / (t_period * dt * mvv2e)) / ftm2v;
+        gamma_ath /= sqrt(ratio[type[i]]);
+
         tran[0] += gamma_ath*(random->uniform()-0.5);
         tran[1] += gamma_ath*(random->uniform()-0.5);
         tran[2] += gamma_ath*(random->uniform()-0.5);
