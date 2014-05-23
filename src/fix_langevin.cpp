@@ -669,6 +669,7 @@ void FixLangevin::omega_thermostat()
 
   // Atom force. Maybe matters that this might be after translational diffusion, non-deterministic?
   double **force = atom->f;
+  double **f_cons = atom->f_det;
   // Dipole orientation. First 3 elements are orientation (not sure if scaled to unity); last is magnitude.
   double **mu = atom->mu;
   // Self-propulsive force in low density, can ignore (beta * D) speed conversion prefactor and keep as force as only care about ratio.
@@ -694,9 +695,9 @@ void FixLangevin::omega_thermostat()
       p[0] = mu[i][0] / mu[i][3];
       p[1] = mu[i][1] / mu[i][3];
       p[2] = mu[i][2] / mu[i][3];
-      F = (force[i][0] + F_p_0 * p[0]) * p[0] +
-          (force[i][1] + F_p_0 * p[1]) * p[1] +
-          (force[i][2] + F_p_0 * p[2]) * p[2];
+      F = (f_cons[i][0] + F_p_0 * p[0]) * p[0] +
+          (f_cons[i][1] + F_p_0 * p[1]) * p[1] +
+          (f_cons[i][2] + F_p_0 * p[2]) * p[2];
       if ((F / F_p_0) < k) {
         // Energy of athermal rotation
         double E_ath = 10.0 * boltz * tsqrt;
