@@ -72,6 +72,7 @@ Atom::Atom(LAMMPS *lmp) : Pointers(lmp)
   type = mask = NULL;
   image = NULL;
   x = v = f = NULL;
+  f_det = NULL;
 
   molecule = NULL;
   molindex = molatom = NULL;
@@ -200,6 +201,7 @@ Atom::~Atom()
   memory->destroy(x);
   memory->destroy(v);
   memory->destroy(f);
+  memory->destroy(f_det);
 
   memory->destroy(q);
   memory->destroy(mu);
