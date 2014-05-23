@@ -679,8 +679,9 @@ void FixLangevin::omega_thermostat()
     if (mask[i] & groupbit) {
       inertiaone = SINERTIA*radius[i]*radius[i]*rmass[i];
       if (tstyle == ATOM) tsqrt = sqrt(tforce[i]);
-      gamma2 = sqrt(inertiaone) * sqrt(7.2*boltz/t_period/dt/mvv2e) / ftm2v;
-      gamma2 *= 1.0/sqrt(ratio[type[i]]) * tsqrt;
+      gamma2 = tsqrt * sqrt(7.2 * inertiaone * boltz / (t_period * dt * mvv2e)) / ftm2v;
+      gamma2 /= sqrt(ratio[type[i]]);
+
       tran[0] = gamma2*(random->uniform()-0.5);
       tran[1] = gamma2*(random->uniform()-0.5);
       tran[2] = gamma2*(random->uniform()-0.5);
