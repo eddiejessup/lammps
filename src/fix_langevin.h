@@ -49,6 +49,7 @@ class FixLangevin : public Fix {
   int gjfflag,oflag,tallyflag,zeroflag,tbiasflag;
   double ascale;
   double t_start,t_stop,t_period,t_target;
+  double energy_athermal,cutoff_athermal;
   double *gfactor1,*gfactor2,*ratio;
   double energy,energy_onestep;
   double tsqrt;

@@ -136,6 +136,13 @@ FixLangevin::FixLangevin(LAMMPS *lmp, int narg, char **arg) :
       else if (strcmp(arg[iarg+1],"yes") == 0) zeroflag = 1;
       else error->all(FLERR,"Illegal fix langevin command");
       iarg += 2;
+    } else if (strcmp(arg[iarg],"athermal") == 0) {
+      if (iarg+3 > narg) error->all(FLERR,"Illegal fix langevin command");
+      double energy_athermal = force->numeric(FLERR,arg[iarg+1]);
+      double cutoff_athermal = force->numeric(FLERR,arg[iarg+2]);
+      if (energy_athermal < 0.0) error->all(FLERR,"Illegal fix langevin command");
+      if (cutoff_athermal < 0.0) error->all(FLERR,"Illegal fix langevin command");
+      iarg += 3;
     } else error->all(FLERR,"Illegal fix langevin command");
   }
 
@@ -649,6 +656,7 @@ void FixLangevin::compute_target()
 void FixLangevin::omega_thermostat()
 {
   double gamma2;
+  double gamma_ath;
 
   double boltz = force->boltz;
   double dt = update->dt;
@@ -674,8 +682,6 @@ void FixLangevin::omega_thermostat()
   double **mu = atom->mu;
   // Self-propulsive force in low density, can ignore (beta * D) speed conversion prefactor and keep as force as only care about ratio.
   double F_p_0 = 24.0;
-  // Critical fraction of self-propulsive force where rotational diffusion increases.
-  double k = 0.5;
   // Particle orientation, taken from dipole orientation and scaled to unity (maybe scaling not needed).
   double p[3];
   // Effective displacive force particle feels, as sum of self0propulsive and interaction terms. something like that anyway.
@@ -698,11 +704,9 @@ void FixLangevin::omega_thermostat()
       F = (f_cons[i][0] + F_p_0 * p[0]) * p[0] +
           (f_cons[i][1] + F_p_0 * p[1]) * p[1] +
           (f_cons[i][2] + F_p_0 * p[2]) * p[2];
-      if ((F / F_p_0) < k) {
-        // Energy of athermal rotation
-        double E_ath = 10.0 * boltz * tsqrt;
+      if ((F / F_p_0) < cutoff_athermal) {
         // drag coefficient for athermal rotation
-        double gamma_ath = sqrt(7.2 * inertiaone * E_ath / (t_period * dt * mvv2e)) / ftm2v;
+        gamma_ath = sqrt(7.2 * inertiaone * energy_athermal / (t_period * dt * mvv2e)) / ftm2v;
         gamma_ath /= sqrt(ratio[type[i]]);
 
         tran[0] += gamma_ath*(random->uniform()-0.5);
