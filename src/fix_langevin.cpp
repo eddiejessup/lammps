@@ -96,6 +96,7 @@ FixLangevin::FixLangevin(LAMMPS *lmp, int narg, char **arg) :
   oflag = 0;
   tallyflag = 0;
   zeroflag = 0;
+  athermalflag = 0;
 
   int iarg = 7;
   while (iarg < narg) {
@@ -138,6 +139,7 @@ FixLangevin::FixLangevin(LAMMPS *lmp, int narg, char **arg) :
       iarg += 2;
     } else if (strcmp(arg[iarg],"athermal") == 0) {
       if (iarg+3 > narg) error->all(FLERR,"Illegal fix langevin command");
+      athermalflag = 1;
       double energy_athermal = force->numeric(FLERR,arg[iarg+1]);
       double cutoff_athermal = force->numeric(FLERR,arg[iarg+2]);
       if (energy_athermal < 0.0) error->all(FLERR,"Illegal fix langevin command");
@@ -698,20 +700,22 @@ void FixLangevin::omega_thermostat()
       tran[1] = gamma2*(random->uniform()-0.5);
       tran[2] = gamma2*(random->uniform()-0.5);
 
-      p[0] = mu[i][0] / mu[i][3];
-      p[1] = mu[i][1] / mu[i][3];
-      p[2] = mu[i][2] / mu[i][3];
-      F = (f_cons[i][0] + F_p_0 * p[0]) * p[0] +
-          (f_cons[i][1] + F_p_0 * p[1]) * p[1] +
-          (f_cons[i][2] + F_p_0 * p[2]) * p[2];
-      if ((F / F_p_0) < cutoff_athermal) {
-        // drag coefficient for athermal rotation
-        gamma_ath = sqrt(7.2 * inertiaone * energy_athermal / (t_period * dt * mvv2e)) / ftm2v;
-        gamma_ath /= sqrt(ratio[type[i]]);
+      if (athermalflag == 1) {
+        p[0] = mu[i][0] / mu[i][3];
+        p[1] = mu[i][1] / mu[i][3];
+        p[2] = mu[i][2] / mu[i][3];
+        F = (f_cons[i][0] + F_p_0 * p[0]) * p[0] +
+            (f_cons[i][1] + F_p_0 * p[1]) * p[1] +
+            (f_cons[i][2] + F_p_0 * p[2]) * p[2];
+        if ((F / F_p_0) < cutoff_athermal) {
+          // drag coefficient for athermal rotation
+          gamma_ath = sqrt(7.2 * inertiaone * energy_athermal / (t_period * dt * mvv2e)) / ftm2v;
+          gamma_ath /= sqrt(ratio[type[i]]);
 
-        tran[0] += gamma_ath*(random->uniform()-0.5);
-        tran[1] += gamma_ath*(random->uniform()-0.5);
-        tran[2] += gamma_ath*(random->uniform()-0.5);
+          tran[0] += gamma_ath*(random->uniform()-0.5);
+          tran[1] += gamma_ath*(random->uniform()-0.5);
+          tran[2] += gamma_ath*(random->uniform()-0.5);
+        }
       }
 
       torque[i][0] += tran[0];

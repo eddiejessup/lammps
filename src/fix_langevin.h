@@ -46,7 +46,7 @@ class FixLangevin : public Fix {
   int unpack_exchange(int, double *);
 
  protected:
-  int gjfflag,oflag,tallyflag,zeroflag,tbiasflag;
+  int gjfflag,oflag,tallyflag,zeroflag,tbiasflag,athermalflag;
   double ascale;
   double t_start,t_stop,t_period,t_target;
   double energy_athermal,cutoff_athermal;
