@@ -140,8 +140,8 @@ FixLangevin::FixLangevin(LAMMPS *lmp, int narg, char **arg) :
     } else if (strcmp(arg[iarg],"athermal") == 0) {
       if (iarg+3 > narg) error->all(FLERR,"Illegal fix langevin command");
       athermalflag = 1;
-      double energy_athermal = force->numeric(FLERR,arg[iarg+1]);
-      double cutoff_athermal = force->numeric(FLERR,arg[iarg+2]);
+      energy_athermal = force->numeric(FLERR,arg[iarg+1]);
+      cutoff_athermal = force->numeric(FLERR,arg[iarg+2]);
       if (energy_athermal < 0.0) error->all(FLERR,"Illegal fix langevin command");
       if (cutoff_athermal < 0.0) error->all(FLERR,"Illegal fix langevin command");
       iarg += 3;
